@@ -35,6 +35,22 @@ fetch() {
   BODY="${resp%$'\n'*}"
 }
 
+# --- Función de peso ------------------------------------------------------
+# Recibe el JSON del endpoint /pokemon y devuelve el peso en kilogramos.
+# La API entrega el peso en hectogramos (1 hg = 0.1 kg).
+get_weight() {
+  local hg
+  hg=$(jq -r '.weight // "null"' <<<"$1")
+
+  if [[ "$hg" == "null" || ! "$hg" =~ ^[0-9]+$ ]]; then
+    printf 'desconocido'
+    return
+  fi
+
+  # División entera para evitar el separador decimal según el locale
+  printf '%s.%s kg' "$((hg / 10))" "$((hg % 10))"
+}
+
 # --- 1) pokemon-species: id, name, habitat, color -------------------------
 fetch "$BASE_URL/pokemon-species/$query"
 
@@ -50,7 +66,7 @@ IFS=$'\t' read -r id name habitat color < <(
   jq -r '[.id, .name, (.habitat.name // "desconocido"), .color.name] | @tsv' <<<"$BODY"
 )
 
-# --- 2) pokemon: type (no viene en pokemon-species) -----------------------
+# --- 2) pokemon: type y weight (no vienen en pokemon-species) -------------
 fetch "$BASE_URL/pokemon/$id"
 
 if [[ "$HTTP_CODE" != "200" ]]; then
@@ -59,7 +75,7 @@ if [[ "$HTTP_CODE" != "200" ]]; then
 fi
 
 type=$(jq -r '[.types[].type.name] | join(",")' <<<"$BODY")
+weight=$(get_weight "$BODY")
 
 # --- Salida ---------------------------------------------------------------
-echo "id:$id name:$name habitat:$habitat type:$type color:$color"
-
+echo "id:$id name:$name habitat:$habitat type:$type color:$color weight:$weight"
