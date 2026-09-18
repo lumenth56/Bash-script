@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
@@ -27,6 +28,8 @@ fi
 ID=$(echo "$DATA" | jq -r '.id')
 POKEMON_NAME=$(echo "$DATA" | jq -r '.name')
 HEIGHT=$(echo "$DATA" | jq -r '.height')
+WEIGHT=$(echo "$DATA" | jq -r '.weight')
+ABILITIES=$(echo "$DATA" | jq -r '[.abilities[] | "name:" + .ability.name] | join(",")')
 
-echo "Id: $ID Name:$POKEMON_NAME Height: $HEIGHT"
+echo "Id: $ID Name:$POKEMON_NAME Height: $HEIGHT weight:$WEIGHT abilities:[$ABILITIES]"
 
