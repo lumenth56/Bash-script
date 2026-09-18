@@ -31,5 +31,8 @@ tail -n "+$LINE" "$TMP/poke" | grep -o '"type":{"name":"[^"]*"' \
 grep -om1 '"weight":[0-9]*' "$TMP/poke" \
   | sed 's/"weight"://; s/^/Weight: /'
 
+grep -om1 '"height":[0-9]*' "$TMP/poke" \
+  | sed 's/"height":/Height: /'
+
 grep -om1 '"color":{"name":"[^"]*"' "$TMP/spec" \
   | sed 's/.*:"/Color: /; s/"$//'
